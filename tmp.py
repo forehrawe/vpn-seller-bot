@@ -11,7 +11,7 @@ q = {
 }
 
 for i in range(len(q) + 1):
-    new = Product(subject=q["subject"][i], region=q["region"][i], volume=q["region"][i], price=q["price"][i])
+    new = Product(subject=q["subject"][i], region=q["region"][i], volume=q["volume"][i], price=q["price"][i])
     db.add(new)
     db.commit()
     print(i)
@@ -25,3 +25,6 @@ for i in range(len(q) + 1):
 # db.commit()
 # db.close()
 
+# d = db.query(User).filter(User.id==1).first()
+# d.is_admin = True
+# db.commit()

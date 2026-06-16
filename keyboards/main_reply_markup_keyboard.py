@@ -4,6 +4,7 @@ from aiogram.types import KeyboardButton
 
 def main_kboard():
     main_keyboard = ReplyKeyboardBuilder()
+    
     main_keyboard.add(
         KeyboardButton(text="Config Panel ▶"),
         KeyboardButton(text="Support 💭"),
