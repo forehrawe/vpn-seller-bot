@@ -1,5 +1,5 @@
 from aiogram import BaseMiddleware
-from database.config import session_local
+from database.config import SessionLocal
 from database.models import User
 
 class UserRegistration(BaseMiddleware):
@@ -10,7 +10,7 @@ class UserRegistration(BaseMiddleware):
         data
     ):
         print('midd started')
-        db = session_local()
+        db = SessionLocal()
         user_account_id = event.from_user.id
         
         user = db.query(User).filter(User.account_id==user_account_id).first()

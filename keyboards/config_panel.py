@@ -1,5 +1,5 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from database.config import session_local
+from database.config import SessionLocal
 from database.models import Product
 
 
@@ -13,14 +13,13 @@ def config_panel_kb():
 
 def plans_list():
     config_list_kb = InlineKeyboardBuilder()
-    db = session_local()
+    db = SessionLocal()
     products = db.query(Product)
     
     for product in products:
-        config_list_kb.button(text=product.subject, callback_data=f"plan_{product.id}_show")
+        config_list_kb.button(text=product.subject, callback_data=f"plan_{product.id}_selected")
     
     config_list_kb.adjust(2)
     
     db.close()
     return config_list_kb.as_markup()
-        
