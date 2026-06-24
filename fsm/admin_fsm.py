@@ -7,3 +7,11 @@ class NewProductFSM(StatesGroup):
     volume = State()
     price = State()
     
+class EditProductFSM(StatesGroup):
+    plan = State()
+    option_to_edit = State()
+    new_value = State()
+
+class OrdersFSM(StatesGroup):
+    id = State()
+    

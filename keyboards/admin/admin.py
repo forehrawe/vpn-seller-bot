@@ -1,5 +1,5 @@
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
-from aiogram.types import KeyboardButton
+from aiogram.types import KeyboardButton, InlineKeyboardButton
 from database.config import SessionLocal
 from database.models import Product
 from callbacks.admin_callback import ProductCallback
@@ -9,7 +9,7 @@ def admin_keyboard():
     
     admin_main_keyboard.add(
         KeyboardButton(text="Manage Products 📦"),
-        KeyboardButton(text="Manage Orders 🛒"),
+        KeyboardButton(text="Show Orders 🛒"),
         KeyboardButton(text="Manage Users 👥"),
         KeyboardButton(text="Manage Admins 👑"),
         KeyboardButton(text="Tickets 🎫"),
@@ -23,7 +23,7 @@ def manage_products():
     manage_products_keyboard.button(text="Show Products 📦", callback_data="show_products_A")
     manage_products_keyboard.button(text="New Product ➕", callback_data="new_product_A")
     manage_products_keyboard.button(text="Remove Product 🗑️", callback_data="remove_product_A")
-    manage_products_keyboard.button(text="Edit Products ✏️", callback_data="edit_products_A")
+    manage_products_keyboard.button(text="Edit Products ✏️", callback_data="update_products_A")
 
     manage_products_keyboard.adjust(1)
     return manage_products_keyboard.as_markup()
@@ -51,9 +51,23 @@ def plans_list_A(action: str):
                 product_id=product.id
                 )
             )
-    
     config_list_kb.adjust(2)
+
+    config_list_kb.row(
+        InlineKeyboardButton(text="Back To Products 🔙", callback_data="back_to_products_panel_A")
+    )
     
     db.close()
     return config_list_kb.as_markup()
         
+
+def options_to_edit_A():
+    witch_to_edit = InlineKeyboardBuilder()
+
+    witch_to_edit.button(text="Subject", callback_data="subject")
+    witch_to_edit.button(text="Price", callback_data="price")
+    witch_to_edit.button(text="Region", callback_data="region")
+    witch_to_edit.button(text="Volume", callback_data="volume")
+    witch_to_edit.adjust(1)
+    
+    return witch_to_edit.as_markup()

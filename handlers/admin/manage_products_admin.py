@@ -1,12 +1,17 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
-from keyboards.admin.admin import admin_keyboard, manage_products, back_to_products_panel_keyboard
+from keyboards.admin.admin import (
+    admin_keyboard,
+    manage_products, 
+    back_to_products_panel_keyboard,
+    options_to_edit_A,
+    )
 from keyboards.admin.admin import plans_list_A
 from middlewares.admin_auth import AdminAuthentication
-from database.models import Product, User, Order, Ticket
+from database.models import Product
 from database.config import SessionLocal
-from fsm.admin_fsm import NewProductFSM
+from fsm.admin_fsm import NewProductFSM, EditProductFSM
 from callbacks.admin_callback import ProductCallback
 
 
@@ -89,6 +94,7 @@ async def get_price(message: Message, state: FSMContext):
         db.commit()
         db.close()
         await message.answer("Product Added Successfully")
+        await state.clear()
     except Exception as e:
         print(e)
         await message.answer("An Error Occurred❗ Please Try Again Later")
@@ -106,8 +112,7 @@ async def remove_product(callback: CallbackQuery):
         reply_markup=plans_list_A(action="delete"))
     
 @product_router_A.callback_query(
-    ProductCallback.filter(F.action == "delete")
-    )
+    ProductCallback.filter(F.action == "delete"))
 async def removoing(callback: CallbackQuery, callback_data: ProductCallback):
     try:
         db = SessionLocal()
@@ -130,11 +135,46 @@ async def removoing(callback: CallbackQuery, callback_data: ProductCallback):
 # Update Product
 # ==========================
     
-@product_router_A.callback_query(F.data == "edit_products_A")
-async def edit_product(callback: CallbackQuery, state: FSMContext):
-    await callback.message.edit_text("Select a Product :", reply_markup=plans_list_A())
+@product_router_A.callback_query(F.data == "update_products_A")
+async def update_product(callback: CallbackQuery, state: FSMContext):
+    await callback.message.edit_text("Select a Product :", reply_markup=plans_list_A(action="update"))
+    await state.set_state(EditProductFSM.plan)
 
+@product_router_A.callback_query(ProductCallback.filter(F.action == "update"), EditProductFSM.plan)
+async def get_product(callback: CallbackQuery, callback_data: ProductCallback, state: FSMContext):
+    await state.update_data(plan=callback_data.product_id)
+    await state.set_state(EditProductFSM.option_to_edit)
+    await callback.message.edit_text("Which one do you want to edit?", reply_markup=options_to_edit_A())
+
+@product_router_A.callback_query(EditProductFSM.option_to_edit)
+async def get_option(callback: CallbackQuery, state: FSMContext):
+    await state.update_data(option_to_edit=callback.data)
+    print(callback.data)
+    await state.set_state(EditProductFSM.new_value)
+    await callback.message.edit_text("Enter New Value To Replace")
+
+@product_router_A.message(EditProductFSM.new_value)
+async def updating(message: Message, state: FSMContext):
+    await state.update_data(new_value=message.text)
+    data = await state.get_data()
+    await state.clear()
     
+    try:
+        db = SessionLocal()
+        product = db.query(Product).filter(Product.id==int(data["plan"])).first()
+        option_to_edit = data["option_to_edit"]
+        setattr(product, option_to_edit, data["new_value"])
+        db.commit()
+        db.close()
+        
+        await message.answer("Successfully Edited ✅")
+    except:
+        await message.answer(
+            text="An Error Occurred❗ Please Try Again Later "
+            )
+
+
+
 
 # ==========================
 # Back To Products Main Panel
